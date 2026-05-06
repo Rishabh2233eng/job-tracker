@@ -2,16 +2,29 @@ const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
 
+const prisma = require('./lib/prisma')
+
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// Middleware — runs on every single request before your routes
-app.use(cors())         // allows React (port 5173) to talk to Express (port 3000)
-app.use(express.json()) // lets Express read JSON from request bodies
+app.use(cors())
+app.use(express.json())
 
-// Test route
 app.get('/', (req, res) => {
   res.json({ message: 'Job Tracker API is running!' })
+})
+
+// Test database connection
+app.get('/test-db', async (req, res) => {
+  try {
+    const userCount = await prisma.user.count()
+    res.json({ 
+      message: 'Database connected!', 
+      userCount 
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Database connection failed' })
+  }
 })
 
 app.listen(PORT, () => {
