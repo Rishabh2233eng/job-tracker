@@ -3,6 +3,7 @@ const cors = require('cors')
 require('dotenv').config()
 
 const authRoutes = require('./routes/auth')
+const applicationRoutes = require('./routes/applications')
 const authMiddleware = require('./middleware/authMiddleware')
 const prisma = require('./lib/prisma')
 
@@ -12,15 +13,18 @@ const PORT = process.env.PORT || 3000
 app.use(cors())
 app.use(express.json())
 
-// Public routes — no token needed
+// Public routes
 app.use('/auth', authRoutes)
+
+// Protected routes
+app.use('/applications', applicationRoutes)
 
 // Health check
 app.get('/', (req, res) => {
   res.json({ message: 'Job Tracker API is running!' })
 })
 
-// Protected route — token required
+// Get current user
 app.get('/auth/me', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
