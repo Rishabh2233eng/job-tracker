@@ -50,7 +50,6 @@ function Dashboard() {
     }
   }
 
-  // Derived state — filter and search
   const filtered = applications
     .filter(app => statusFilter === 'all' || app.status === statusFilter)
     .filter(app => app.company.toLowerCase().includes(search.toLowerCase()) ||
@@ -74,7 +73,22 @@ function Dashboard() {
     <div className="min-h-screen bg-gray-50">
 
       <nav className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-gray-800">Job Tracker</h1>
+        <div className="flex items-center gap-6">
+          <h1 className="text-lg font-semibold text-gray-800">Job Tracker</h1>
+          <div className="flex gap-2">
+            <button
+              className="text-sm text-blue-600 font-medium px-3 py-1.5 rounded-lg bg-blue-50"
+            >
+              List view
+            </button>
+            <button
+              onClick={() => navigate('/board')}
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100"
+            >
+              Board view
+            </button>
+          </div>
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">Hey, {user?.name} 👋</span>
           <button

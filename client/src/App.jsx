@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import KanbanBoard from './pages/KanbanBoard'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -15,6 +16,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/board"
+          element={
+            <ProtectedRoute>
+              <KanbanBoard />
             </ProtectedRoute>
           }
         />
