@@ -5,6 +5,8 @@ import { getApplications, deleteApplication } from '../api/applications'
 import AddApplicationForm from '../components/AddApplicationForm'
 import StatusBadge from '../components/StatusBadge'
 
+const STATUS_FILTERS = ['all', 'saved', 'applied', 'interview', 'offer', 'rejected']
+
 function Dashboard() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
@@ -12,6 +14,8 @@ function Dashboard() {
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -46,11 +50,24 @@ function Dashboard() {
     }
   }
 
+  // Derived state — filter and search
+  const filtered = applications
+    .filter(app => statusFilter === 'all' || app.status === statusFilter)
+    .filter(app => app.company.toLowerCase().includes(search.toLowerCase()) ||
+                   app.role.toLowerCase().includes(search.toLowerCase()))
+
   const stats = {
     total: applications.length,
     applied: applications.filter(a => a.status === 'applied').length,
     interview: applications.filter(a => a.status === 'interview').length,
     offer: applications.filter(a => a.status === 'offer').length,
+  }
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null
+    return new Date(dateStr).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    })
   }
 
   return (
@@ -85,7 +102,7 @@ function Dashboard() {
           ))}
         </div>
 
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Applications</h2>
           <button
             onClick={() => setShowForm(true)}
@@ -95,18 +112,54 @@ function Dashboard() {
           </button>
         </div>
 
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <input
+            type="text"
+            placeholder="Search by company or role..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex gap-2 flex-wrap">
+            {STATUS_FILTERS.map(s => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  statusFilter === s
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading...</div>
-        ) : applications.length === 0 ? (
+          <div className="space-y-3">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-3 bg-gray-100 rounded w-1/3"></div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">No applications yet</p>
+            <p className="text-gray-400 text-lg">
+              {applications.length === 0 ? 'No applications yet' : 'No results found'}
+            </p>
             <p className="text-gray-400 text-sm mt-1">
-              Click "Add Application" to get started
+              {applications.length === 0
+                ? 'Click "Add Application" to get started'
+                : 'Try a different search or filter'}
             </p>
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
-            {applications.map(app => (
+            {filtered.map(app => (
               <div
                 key={app.id}
                 className="flex items-center justify-between px-6 py-4 hover:bg-gray-50"
@@ -117,6 +170,9 @@ function Dashboard() {
                   {app.notes && (
                     <p className="text-xs text-gray-400 mt-1">{app.notes}</p>
                   )}
+                  <p className="text-xs text-gray-300 mt-1">
+                    Added {formatDate(app.createdAt)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <StatusBadge status={app.status} />
