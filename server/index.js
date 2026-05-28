@@ -4,6 +4,7 @@ require('dotenv').config()
 
 const authRoutes = require('./routes/auth')
 const applicationRoutes = require('./routes/applications')
+const noteRoutes = require('./routes/notes')
 const authMiddleware = require('./middleware/authMiddleware')
 const prisma = require('./lib/prisma')
 
@@ -18,11 +19,7 @@ app.use('/auth', authRoutes)
 
 // Protected routes
 app.use('/applications', applicationRoutes)
-
-// Health check
-app.get('/', (req, res) => {
-  res.json({ message: 'Job Tracker API is running!' })
-})
+app.use('/applications/:id/notes', noteRoutes)
 
 // Get current user
 app.get('/auth/me', authMiddleware, async (req, res) => {
@@ -35,6 +32,11 @@ app.get('/auth/me', authMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' })
   }
+})
+
+// Health check
+app.get('/', (req, res) => {
+  res.json({ message: 'Job Tracker API is running!' })
 })
 
 app.listen(PORT, () => {

@@ -4,6 +4,7 @@ import useAuthStore from '../store/authStore'
 import { getApplications, deleteApplication } from '../api/applications'
 import AddApplicationForm from '../components/AddApplicationForm'
 import StatusBadge from '../components/StatusBadge'
+import NotesModal from '../components/NotesModal'
 
 const STATUS_FILTERS = ['all', 'saved', 'applied', 'interview', 'offer', 'rejected']
 
@@ -16,6 +17,7 @@ function Dashboard() {
   const [showForm, setShowForm] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [selectedApp, setSelectedApp] = useState(null)
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -191,6 +193,12 @@ function Dashboard() {
                 <div className="flex items-center gap-4">
                   <StatusBadge status={app.status} />
                   <button
+                    onClick={() => setSelectedApp(app)}
+                    className="text-xs text-blue-400 hover:text-blue-600"
+                  >
+                    Notes
+                  </button>
+                  <button
                     onClick={() => handleDelete(app.id)}
                     className="text-xs text-red-400 hover:text-red-600"
                   >
@@ -208,6 +216,13 @@ function Dashboard() {
         <AddApplicationForm
           onAdd={handleAdd}
           onClose={() => setShowForm(false)}
+        />
+      )}
+
+      {selectedApp && (
+        <NotesModal
+          application={selectedApp}
+          onClose={() => setSelectedApp(null)}
         />
       )}
 

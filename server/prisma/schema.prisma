@@ -17,15 +17,24 @@ model User {
 }
 
 model Application {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
   company   String
   role      String
-  status    String    @default("saved")
+  status    String   @default("saved")
   jobUrl    String?
   appliedAt DateTime?
   notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appNotes  Note[]
+}
+
+model Note {
+  id            String      @id @default(uuid())
+  applicationId String
+  content       String
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
