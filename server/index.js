@@ -11,17 +11,22 @@ const prisma = require('./lib/prisma')
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.use(cors())
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL
+].filter(Boolean)
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}))
+
 app.use(express.json())
 
-// Public routes
 app.use('/auth', authRoutes)
-
-// Protected routes
 app.use('/applications', applicationRoutes)
 app.use('/applications/:id/notes', noteRoutes)
 
-// Get current user
 app.get('/auth/me', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -34,7 +39,6 @@ app.get('/auth/me', authMiddleware, async (req, res) => {
   }
 })
 
-// Health check
 app.get('/', (req, res) => {
   res.json({ message: 'Job Tracker API is running!' })
 })
